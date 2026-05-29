@@ -240,6 +240,165 @@ container.appendChild(div);
 });
 
 }
+
+function getTargetIndex(startIndex, gap){
+
+return startIndex + gap;
+
+}
+
+function getSharedDigits(a,b){
+
+const setA =
+new Set(a.split(""));
+
+const setB =
+new Set(b.split(""));
+
+const shared = [];
+
+setA.forEach(d=>{
+
+if(setB.has(d)){
+shared.push(d);
+}
+
+});
+
+return shared;
+
+}
+
+function runSearch(){
+
+const gapText =
+document
+.getElementById("gapInput")
+.value
+.trim();
+
+if(!gapText){
+
+renderOriginal();
+document
+.getElementById("resultView")
+.innerHTML = "";
+
+return;
+
+}
+
+const gap =
+parseInt(
+gapText.replace("=","")
+);
+
+if(
+isNaN(gap) ||
+gap < 1 ||
+gap > 60
+){
+alert("Gap 1 - 60 only");
+return;
+}
+
+searchGap(gap);
+
+}
+
+function searchGap(gap){
+
+const resultView =
+document.getElementById(
+"resultView"
+);
+
+resultView.innerHTML = "";
+
+document
+.getElementById(
+"originalView"
+)
+.innerHTML = "";
+
+let colorCounter = 0;
+
+for(
+let i=0;
+i<rawNumbers.length;
+i++
+){
+
+const targetIndex =
+getTargetIndex(
+i,
+gap
+);
+
+if(
+targetIndex >=
+rawNumbers.length
+){
+continue;
+}
+
+const top =
+rawNumbers[i];
+
+const bottom =
+rawNumbers[targetIndex];
+
+const shared =
+getSharedDigits(
+top,
+bottom
+);
+
+if(
+shared.length > 0
+){
+
+const color =
+arrowColors[
+colorCounter %
+arrowColors.length
+];
+
+colorCounter++;
+
+createBlock(
+i,
+targetIndex,
+top,
+bottom,
+shared,
+color,
+gap
+);
+
+}
+
+}
+
+}
+
+function resetSearch(){
+
+document
+.getElementById(
+"gapInput"
+)
+.value = "";
+
+document
+.getElementById(
+"resultView"
+)
+.innerHTML = "";
+
+renderOriginal();
+
+}
 </script>
 </body>
 </html>
