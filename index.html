@@ -232,8 +232,8 @@ document.createElement("div");
 div.className="block";
 
 div.innerHTML=
-`Row ${index+1}
- : ${num}`;
+`<div class="blockTitle">Row ${index+1}</div>
+ <div>${num}</div>`;
 
 container.appendChild(div);
 
@@ -399,6 +399,165 @@ document
 renderOriginal();
 
 }
+
+function getDigitPositions(count, startX, space){
+
+const positions = [];
+const totalWidth = (count - 1) * space;
+const firstX = startX - totalWidth / 2;
+
+for(let i=0;i<count;i++){
+positions.push(firstX + (i * space));
+}
+
+return positions;
+
+}
+
+function createArrowSvg(top, bottom, shared, colorClass, gap, topIndex, bottomIndex){
+
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(svgNS, "svg");
+svg.setAttribute("viewBox", "0 0 420 180");
+
+const defs = document.createElementNS(svgNS, "defs");
+const marker = document.createElementNS(svgNS, "marker");
+marker.setAttribute("id", `arrowhead-${topIndex}-${bottomIndex}-${Math.random().toString(36).slice(2,7)}`);
+marker.setAttribute("markerWidth", "10");
+marker.setAttribute("markerHeight", "10");
+marker.setAttribute("refX", "8");
+marker.setAttribute("refY", "3");
+marker.setAttribute("orient", "auto");
+marker.setAttribute("markerUnits", "strokeWidth");
+
+const path = document.createElementNS(svgNS, "path");
+path.setAttribute("d", "M0,0 L0,6 L9,3 z");
+path.setAttribute("fill", "currentColor");
+
+marker.appendChild(path);
+defs.appendChild(marker);
+svg.appendChild(defs);
+
+const topDigits = top.split("");
+const bottomDigits = bottom.split("");
+
+const topX = getDigitPositions(topDigits.length, 210, 42);
+const bottomX = getDigitPositions(bottomDigits.length, 210, 42);
+
+const topY = 40;
+const bottomY = 140;
+
+topDigits.forEach((d,i)=>{
+
+const t = document.createElementNS(svgNS, "text");
+t.setAttribute("x", topX[i]);
+t.setAttribute("y", topY);
+t.setAttribute("text-anchor", "middle");
+t.setAttribute("class", "digit");
+t.textContent = d;
+svg.appendChild(t);
+
+});
+
+bottomDigits.forEach((d,i)=>{
+
+const t = document.createElementNS(svgNS, "text");
+t.setAttribute("x", bottomX[i]);
+t.setAttribute("y", bottomY);
+t.setAttribute("text-anchor", "middle");
+t.setAttribute("class", "digit");
+t.textContent = d;
+svg.appendChild(t);
+
+});
+
+let arrowCount = 0;
+
+shared.forEach(digit=>{
+
+const topMatches = [];
+const bottomMatches = [];
+
+topDigits.forEach((d,i)=>{
+if(d === digit) topMatches.push(i);
+});
+
+bottomDigits.forEach((d,i)=>{
+if(d === digit) bottomMatches.push(i);
+});
+
+topMatches.forEach(ti=>{
+bottomMatches.forEach(bi=>{
+
+const line = document.createElementNS(svgNS, "line");
+line.setAttribute("x1", topX[ti]);
+line.setAttribute("y1", topY + 8);
+line.setAttribute("x2", bottomX[bi]);
+line.setAttribute("y2", bottomY - 18);
+line.setAttribute("class", colorClass);
+
+const markerId = marker.getAttribute("id");
+line.setAttribute("marker-end", `url(#${markerId})`);
+
+svg.appendChild(line);
+arrowCount++;
+
+});
+});
+
+});
+
+return svg;
+
+}
+
+function createBlock(i, targetIndex, top, bottom, shared, colorClass, gap){
+
+const resultView =
+document.getElementById("resultView");
+
+const block =
+document.createElement("div");
+
+block.className = "block";
+
+const title =
+document.createElement("div");
+
+title.className = "blockTitle";
+title.textContent = `Match: Row ${i+1} → Row ${targetIndex+1}   |   Gap = ${gap}`;
+
+const info =
+document.createElement("div");
+info.style.marginBottom = "10px";
+info.textContent = `Shared digits: ${shared.join(", ")}`;
+
+const svg = createArrowSvg(
+top,
+bottom,
+shared,
+colorClass,
+gap,
+i,
+targetIndex
+);
+
+block.appendChild(title);
+block.appendChild(info);
+block.appendChild(svg);
+
+resultView.appendChild(block);
+
+}
+
+document.addEventListener("keydown", function(e){
+if(e.key === "Enter"){
+const active = document.activeElement;
+if(active && active.id === "gapInput"){
+runSearch();
+}
+}
+});
 </script>
 </body>
 </html>
