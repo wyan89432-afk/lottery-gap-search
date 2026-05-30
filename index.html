@@ -1,563 +1,415 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gap Search Tool</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gap Search Tool</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --border-color: #333;
+            --text-color: #e0e0e0;
+            --accent-yellow: #ffd600;
+            --accent-green: #00c853;
+            --accent-red: #ff1744;
+            --accent-blue: #2962ff;
+            --primary-color: #3d5afe;
+        }
 
-<style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            line-height: 1.6;
+        }
 
-body{
-background:#111;
-color:#fff;
-padding:20px;
-}
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-.container{
-max-width:1200px;
-margin:auto;
-}
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+        }
 
-h1{
-text-align:center;
-margin-bottom:20px;
-}
+        .input-section {
+            background: var(--surface-color);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
 
-textarea{
-width:100%;
-height:220px;
-background:#1e1e1e;
-color:white;
-border:1px solid #444;
-padding:10px;
-border-radius:10px;
-resize:vertical;
-}
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #111;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
 
-.controls{
-display:flex;
-gap:10px;
-margin-top:15px;
-flex-wrap:wrap;
-}
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
 
-input{
-padding:10px;
-background:#1e1e1e;
-color:white;
-border:1px solid #444;
-border-radius:8px;
-width:120px;
-}
+        input[type="text"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px;
+            background: #111;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+        }
 
-button{
-padding:10px 15px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-}
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
 
-.loadBtn{
-background:#00c853;
-color:white;
-}
+        button:active {
+            opacity: 0.7;
+        }
 
-.searchBtn{
-background:#2962ff;
-color:white;
-}
+        .btn-load { background-color: var(--accent-green); color: #000; }
+        .btn-search { background-color: var(--primary-color); color: #fff; }
+        .btn-reset { background-color: var(--accent-red); color: #fff; }
 
-.resetBtn{
-background:#d50000;
-color:white;
-}
+        #displayArea {
+            margin-top: 20px;
+        }
 
-#originalView{
-margin-top:25px;
-}
+        .data-block {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
 
-#resultView{
-margin-top:25px;
-}
+        .block-header {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
 
-.block{
-background:#1a1a1a;
-border:1px solid #333;
-padding:15px;
-margin-bottom:20px;
-border-radius:12px;
-}
+        .match-info {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
 
-.blockTitle{
-font-size:18px;
-font-weight:bold;
-margin-bottom:10px;
-color:#ffd600;
-}
+        .svg-container {
+            width: 100%;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
 
-svg{
-width:100%;
-height:180px;
-overflow:visible;
-}
+        svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
 
-.hidden{
-display:none;
-}
+        .digit-text {
+            font-size: 32px;
+            font-weight: bold;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
 
-.digit{
-font-size:30px;
-font-weight:bold;
-fill:white;
-}
+        .arrow-line {
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+        }
 
-.arrow-yellow{
-stroke:yellow;
-stroke-width:3;
-fill:none;
-}
+        .arrow-yellow { stroke: var(--accent-yellow); }
+        .arrow-green { stroke: var(--accent-green); }
+        .arrow-red { stroke: var(--accent-red); }
+        .arrow-blue { stroke: var(--accent-blue); }
 
-.arrow-green{
-stroke:#00ff00;
-stroke-width:3;
-fill:none;
-}
+        .row-item {
+            padding: 5px 10px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+        }
 
-.arrow-red{
-stroke:red;
-stroke-width:3;
-fill:none;
-}
+        .row-label { color: #666; font-size: 12px; }
 
-.arrow-blue{
-stroke:#00b0ff;
-stroke-width:3;
-fill:none;
-}
+        .hidden { display: none; }
 
-</style>
+        @media (max-width: 480px) {
+            .controls { flex-direction: column; align-items: stretch; }
+            button { width: 100%; }
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
+    <h1>GAP SEARCH TOOL</h1>
 
-<h1>Gap Search Tool</h1>
+    <div class="input-section">
+        <textarea id="excelInput" placeholder="Paste Excel Data Here..."></textarea>
+        <div class="controls">
+            <input type="text" id="gapInput" placeholder="=1" value="=1">
+            <button class="btn-load" onclick="handleLoad()">Load</button>
+            <button class="btn-search" onclick="handleSearch()">Search</button>
+            <button class="btn-reset" onclick="handleReset()">Reset</button>
+        </div>
+    </div>
 
-<textarea id="excelData"
-placeholder="Paste Excel Data Here"></textarea>
-
-<div class="controls">
-
-<button class="loadBtn"
-onclick="loadData()">
-Load
-</button>
-
-<input
-id="gapInput"
-placeholder="=5">
-
-<button class="searchBtn"
-onclick="runSearch()">
-Search
-</button>
-
-<button class="resetBtn"
-onclick="resetSearch()">
-Reset
-</button>
-
-</div>
-
-<div id="originalView"></div>
-
-<div id="resultView"></div>
-
+    <div id="displayArea"></div>
 </div>
 
 <script>
-
-let rawNumbers = [];
-
-const arrowColors = [
-"arrow-yellow",
-"arrow-green",
-"arrow-red",
-"arrow-blue"
-];
-
-function loadData(){
-
-const text =
-document
-.getElementById("excelData")
-.value
-.trim();
-
-if(!text) return;
-
-rawNumbers =
-text
-.split(/\n+/)
-.map(v=>v.trim())
-.filter(v=>v);
-
-renderOriginal();
-
-}
-
-function renderOriginal(){
-
-const container =
-document.getElementById(
-"originalView"
-);
-
-container.innerHTML = "";
-
-rawNumbers.forEach((num,index)=>{
-
-const div =
-document.createElement("div");
-
-div.className="block";
-
-div.innerHTML=
-`<div class="blockTitle">Row ${index+1}</div>
- <div>${num}</div>`;
-
-container.appendChild(div);
-
-});
-
-}
-
-function getTargetIndex(startIndex, gap){
-
-return startIndex + gap;
-
-}
-
-function getSharedDigits(a,b){
-
-const setA =
-new Set(a.split(""));
-
-const setB =
-new Set(b.split(""));
-
-const shared = [];
-
-setA.forEach(d=>{
-
-if(setB.has(d)){
-shared.push(d);
-}
-
-});
-
-return shared;
-
-}
-
-function runSearch(){
-
-const gapText =
-document
-.getElementById("gapInput")
-.value
-.trim();
-
-if(!gapText){
-
-renderOriginal();
-document
-.getElementById("resultView")
-.innerHTML = "";
-
-return;
-
-}
-
-const gap =
-parseInt(
-gapText.replace("=","")
-);
-
-if(
-isNaN(gap) ||
-gap < 1 ||
-gap > 60
-){
-alert("Gap 1 - 60 only");
-return;
-}
-
-searchGap(gap);
-
-}
-
-function searchGap(gap){
-
-const resultView =
-document.getElementById(
-"resultView"
-);
-
-resultView.innerHTML = "";
-
-document
-.getElementById(
-"originalView"
-)
-.innerHTML = "";
-
-let colorCounter = 0;
-
-for(
-let i=0;
-i<rawNumbers.length;
-i++
-){
-
-const targetIndex =
-getTargetIndex(
-i,
-gap
-);
-
-if(
-targetIndex >=
-rawNumbers.length
-){
-continue;
-}
-
-const top =
-rawNumbers[i];
-
-const bottom =
-rawNumbers[targetIndex];
-
-const shared =
-getSharedDigits(
-top,
-bottom
-);
-
-if(
-shared.length > 0
-){
-
-const color =
-arrowColors[
-colorCounter %
-arrowColors.length
-];
-
-colorCounter++;
-
-createBlock(
-i,
-targetIndex,
-top,
-bottom,
-shared,
-color,
-gap
-);
-
-}
-
-}
-
-}
-
-function resetSearch(){
-
-document
-.getElementById(
-"gapInput"
-)
-.value = "";
-
-document
-.getElementById(
-"resultView"
-)
-.innerHTML = "";
-
-renderOriginal();
-
-}
-
-function getDigitPositions(count, startX, space){
-
-const positions = [];
-const totalWidth = (count - 1) * space;
-const firstX = startX - totalWidth / 2;
-
-for(let i=0;i<count;i++){
-positions.push(firstX + (i * space));
-}
-
-return positions;
-
-}
-
-function createArrowSvg(top, bottom, shared, colorClass, gap, topIndex, bottomIndex){
-
-const svgNS = "http://www.w3.org/2000/svg";
-const svg = document.createElementNS(svgNS, "svg");
-svg.setAttribute("viewBox", "0 0 420 180");
-
-const defs = document.createElementNS(svgNS, "defs");
-const marker = document.createElementNS(svgNS, "marker");
-marker.setAttribute("id", `arrowhead-${topIndex}-${bottomIndex}-${Math.random().toString(36).slice(2,7)}`);
-marker.setAttribute("markerWidth", "10");
-marker.setAttribute("markerHeight", "10");
-marker.setAttribute("refX", "8");
-marker.setAttribute("refY", "3");
-marker.setAttribute("orient", "auto");
-marker.setAttribute("markerUnits", "strokeWidth");
-
-const path = document.createElementNS(svgNS, "path");
-path.setAttribute("d", "M0,0 L0,6 L9,3 z");
-path.setAttribute("fill", "currentColor");
-
-marker.appendChild(path);
-defs.appendChild(marker);
-svg.appendChild(defs);
-
-const topDigits = top.split("");
-const bottomDigits = bottom.split("");
-
-const topX = getDigitPositions(topDigits.length, 210, 42);
-const bottomX = getDigitPositions(bottomDigits.length, 210, 42);
-
-const topY = 40;
-const bottomY = 140;
-
-topDigits.forEach((d,i)=>{
-
-const t = document.createElementNS(svgNS, "text");
-t.setAttribute("x", topX[i]);
-t.setAttribute("y", topY);
-t.setAttribute("text-anchor", "middle");
-t.setAttribute("class", "digit");
-t.textContent = d;
-svg.appendChild(t);
-
-});
-
-bottomDigits.forEach((d,i)=>{
-
-const t = document.createElementNS(svgNS, "text");
-t.setAttribute("x", bottomX[i]);
-t.setAttribute("y", bottomY);
-t.setAttribute("text-anchor", "middle");
-t.setAttribute("class", "digit");
-t.textContent = d;
-svg.appendChild(t);
-
-});
-
-let arrowCount = 0;
-
-shared.forEach(digit=>{
-
-const topMatches = [];
-const bottomMatches = [];
-
-topDigits.forEach((d,i)=>{
-if(d === digit) topMatches.push(i);
-});
-
-bottomDigits.forEach((d,i)=>{
-if(d === digit) bottomMatches.push(i);
-});
-
-topMatches.forEach(ti=>{
-bottomMatches.forEach(bi=>{
-
-const line = document.createElementNS(svgNS, "line");
-line.setAttribute("x1", topX[ti]);
-line.setAttribute("y1", topY + 8);
-line.setAttribute("x2", bottomX[bi]);
-line.setAttribute("y2", bottomY - 18);
-line.setAttribute("class", colorClass);
-
-const markerId = marker.getAttribute("id");
-line.setAttribute("marker-end", `url(#${markerId})`);
-
-svg.appendChild(line);
-arrowCount++;
-
-});
-});
-
-});
-
-return svg;
-
-}
-
-function createBlock(i, targetIndex, top, bottom, shared, colorClass, gap){
-
-const resultView =
-document.getElementById("resultView");
-
-const block =
-document.createElement("div");
-
-block.className = "block";
-
-const title =
-document.createElement("div");
-
-title.className = "blockTitle";
-title.textContent = `Match: Row ${i+1} → Row ${targetIndex+1}   |   Gap = ${gap}`;
-
-const info =
-document.createElement("div");
-info.style.marginBottom = "10px";
-info.textContent = `Shared digits: ${shared.join(", ")}`;
-
-const svg = createArrowSvg(
-top,
-bottom,
-shared,
-colorClass,
-gap,
-i,
-targetIndex
-);
-
-block.appendChild(title);
-block.appendChild(info);
-block.appendChild(svg);
-
-resultView.appendChild(block);
-
-}
-
-document.addEventListener("keydown", function(e){
-if(e.key === "Enter"){
-const active = document.activeElement;
-if(active && active.id === "gapInput"){
-runSearch();
-}
-}
-});
+    let rawData = [];
+    const COLORS = ['arrow-yellow', 'arrow-green', 'arrow-red', 'arrow-blue'];
+
+    function handleLoad() {
+        const text = document.getElementById('excelInput').value.trim();
+        if (!text) return;
+
+        // Parse Excel data (tabs, newlines, spaces)
+        rawData = text.split(/[\n\t\r]+/).map(v => v.trim()).filter(v => v !== "");
+        renderOriginal();
+    }
+
+    function renderOriginal() {
+        const displayArea = document.getElementById('displayArea');
+        displayArea.innerHTML = "";
+        
+        if (rawData.length === 0) return;
+
+        const container = document.createElement('div');
+        container.className = 'data-block';
+        
+        rawData.forEach((val, idx) => {
+            const row = document.createElement('div');
+            row.className = 'row-item';
+            row.innerHTML = `<span class="row-label">Row ${idx + 1}</span><span>${val}</span>`;
+            container.appendChild(row);
+        });
+        
+        displayArea.appendChild(container);
+    }
+
+    function handleReset() {
+        document.getElementById('excelInput').value = "";
+        document.getElementById('gapInput').value = "=1";
+        rawData = [];
+        document.getElementById('displayArea').innerHTML = "";
+    }
+
+    function getSharedDigits(a, b) {
+        const setA = new Set(a.toString().split(''));
+        const setB = new Set(b.toString().split(''));
+        const shared = [];
+        setA.forEach(digit => {
+            if (setB.has(digit)) shared.push(digit);
+        });
+        return shared;
+    }
+
+    function handleSearch() {
+        const gapValue = document.getElementById('gapInput').value.trim();
+        const gapMatch = gapValue.match(/^=(\d+)$/);
+        
+        if (!gapMatch) {
+            alert("Please enter gap in format =1 through =60");
+            return;
+        }
+        
+        const gap = parseInt(gapMatch[1]);
+        if (gap < 1 || gap > 60) {
+            alert("Gap must be between 1 and 60");
+            return;
+        }
+
+        if (rawData.length === 0) {
+            handleLoad();
+        }
+
+        if (rawData.length === 0) return;
+
+        const displayArea = document.getElementById('displayArea');
+        displayArea.innerHTML = "";
+
+        let colorIdx = 0;
+
+        for (let i = 0; i < rawData.length; i++) {
+            const targetIdx = i + gap;
+            if (targetIdx >= rawData.length) break;
+
+            const val1 = rawData[i];
+            const val2 = rawData[targetIdx];
+            const shared = getSharedDigits(val1, val2);
+
+            if (shared.length > 0) {
+                const colorClass = COLORS[colorIdx % COLORS.length];
+                colorIdx++;
+                createMatchBlock(i, targetIdx, val1, val2, shared, colorClass, gap);
+            }
+        }
+
+        if (displayArea.innerHTML === "") {
+            displayArea.innerHTML = "<div style='text-align:center; color:#888;'>No matches found for Gap =" + gap + "</div>";
+        }
+    }
+
+    function createMatchBlock(idx1, idx2, val1, val2, shared, colorClass, gap) {
+        const displayArea = document.getElementById('displayArea');
+        const block = document.createElement('div');
+        block.className = 'data-block';
+
+        const header = document.createElement('div');
+        header.className = 'block-header';
+        header.innerHTML = `<span>Row ${idx1 + 1} → Row ${idx2 + 1}</span><span class="match-info">GAP = ${gap}</span>`;
+        block.appendChild(header);
+
+        const sharedInfo = document.createElement('div');
+        sharedInfo.style.fontSize = '12px';
+        sharedInfo.style.marginBottom = '10px';
+        sharedInfo.style.textAlign = 'center';
+        sharedInfo.innerHTML = `Shared: <span style="color:white">${shared.join(', ')}</span>`;
+        block.appendChild(sharedInfo);
+
+        const svgContainer = document.createElement('div');
+        svgContainer.className = 'svg-container';
+        
+        // If gap > 10, don't draw arrows, just show digits
+        const drawArrows = gap <= 10;
+        svgContainer.appendChild(createSVG(val1, val2, shared, colorClass, drawArrows));
+        
+        block.appendChild(svgContainer);
+        displayArea.appendChild(block);
+    }
+
+    function createSVG(val1, val2, shared, colorClass, drawArrows) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("viewBox", "0 0 300 140");
+
+        const s1 = val1.toString();
+        const s2 = val2.toString();
+
+        const getX = (idx, total) => {
+            const spacing = 50;
+            const start = 150 - ((total - 1) * spacing) / 2;
+            return start + idx * spacing;
+        };
+
+        // Draw Top Digits
+        for (let i = 0; i < s1.length; i++) {
+            const text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", getX(i, s1.length));
+            text.setAttribute("y", 30);
+            text.setAttribute("class", "digit-text");
+            text.textContent = s1[i];
+            svg.appendChild(text);
+        }
+
+        // Draw Bottom Digits
+        for (let i = 0; i < s2.length; i++) {
+            const text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", getX(i, s2.length));
+            text.setAttribute("y", 110);
+            text.setAttribute("class", "digit-text");
+            text.textContent = s2[i];
+            svg.appendChild(text);
+        }
+
+        // Draw Arrows
+        if (drawArrows) {
+            // Add Arrow Marker Defs
+            const defs = document.createElementNS(svgNS, "defs");
+            const marker = document.createElementNS(svgNS, "marker");
+            const markerId = "arrowhead-" + Math.random().toString(36).substr(2, 9);
+            marker.setAttribute("id", markerId);
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "7");
+            marker.setAttribute("refX", "9");
+            marker.setAttribute("refY", "3.5");
+            marker.setAttribute("orient", "auto");
+            
+            const polygon = document.createElementNS(svgNS, "polygon");
+            polygon.setAttribute("points", "0 0, 10 3.5, 0 7");
+            polygon.setAttribute("fill", "currentColor");
+            
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+
+            shared.forEach(digit => {
+                const topIndices = [];
+                const bottomIndices = [];
+
+                for (let i = 0; i < s1.length; i++) if (s1[i] === digit) topIndices.push(i);
+                for (let i = 0; i < s2.length; i++) if (s2[i] === digit) bottomIndices.push(i);
+
+                topIndices.forEach(ti => {
+                    bottomIndices.forEach(bi => {
+                        const line = document.createElementNS(svgNS, "line");
+                        line.setAttribute("x1", getX(ti, s1.length));
+                        line.setAttribute("y1", 45);
+                        line.setAttribute("x2", getX(bi, s2.length));
+                        line.setAttribute("y2", 90);
+                        line.setAttribute("class", "arrow-line " + colorClass);
+                        line.setAttribute("marker-end", `url(#${markerId})`);
+                        line.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-' + colorClass.split('-')[1]);
+                        svg.appendChild(line);
+                    });
+                });
+            });
+        }
+
+        return svg;
+    }
+
+    // Support Enter key for search
+    document.getElementById('gapInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
 </script>
+
 </body>
 </html>
