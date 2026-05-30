@@ -3,405 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gap Search Tool (Table Version)</title>
+    <title>Advanced Gap Search Tool</title>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --surface-color: #1a1a1a;
-            --border-color: #333;
-            --text-color: #eee;
-            --accent-yellow: #ffeb3b;
-            --accent-green: #4caf50;
-            --accent-red: #f44336;
-            --accent-blue: #2196f3;
-            --header-bg: #252525;
+            --bg-color: #0b0e14;
+            --panel-bg: #151921;
+            --border-color: #2d343f;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --accent-yellow: #fbbf24;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --cell-bg: #1e293b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 10px; overflow-x: hidden; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 10px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 1.2rem; margin-bottom: 15px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
 
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 15px;
-            color: var(--accent-yellow);
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .input-section {
-            background: var(--surface-color);
+        /* Header / Search Area */
+        .search-panel {
+            background: var(--panel-bg);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             margin-bottom: 20px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            background: #000;
-            color: #0f0;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 10px;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .controls {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
         }
 
+        .search-group { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+        label { font-size: 14px; color: var(--text-dim); }
         input[type="text"] {
-            padding: 8px;
             background: #000;
+            border: 1px solid var(--border-color);
             color: #fff;
-            border: 1px solid #555;
+            padding: 8px 12px;
             border-radius: 4px;
-            width: 80px;
-            text-align: center;
+            width: 100%;
+            outline: none;
         }
 
         button {
-            padding: 8px 15px;
-            border: none;
+            padding: 8px 16px;
             border-radius: 4px;
+            border: none;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-            text-transform: uppercase;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
         }
+        .btn-search { background: var(--accent-blue); color: white; }
+        .btn-clear { background: var(--accent-red); color: white; }
+        .btn-load { background: var(--accent-green); color: white; }
 
-        .btn-load { background-color: var(--accent-green); color: #000; }
-        .btn-search { background-color: var(--accent-blue); color: #fff; }
-        .btn-reset { background-color: var(--accent-red); color: #fff; }
-
-        /* Table Styles */
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 10px;
-            background: var(--surface-color);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        table {
-            border-collapse: collapse;
-            margin: 0 auto;
-        }
-
-        td, th {
-            border: 1px solid #333;
-            padding: 5px 10px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        th {
-            background: var(--header-bg);
-            color: #888;
-            font-size: 10px;
-        }
-
-        .row-num {
-            color: #555;
-            font-size: 10px;
-            background: #111;
-        }
-
-        /* Result Blocks */
-        .result-container {
-            margin-top: 20px;
-        }
-
-        .match-block {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            padding: 15px;
+        /* Grid Layout */
+        .grid-wrapper {
             position: relative;
-            overflow: visible;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            overflow-x: auto;
+            min-height: 600px;
         }
 
-        .match-label {
-            font-size: 11px;
-            color: #777;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #222;
-            padding-bottom: 5px;
+        table { border-collapse: collapse; position: relative; z-index: 1; width: 100%; }
+        th, td { 
+            border: 1px solid var(--border-color); 
+            width: 80px; 
+            height: 40px; 
+            text-align: center; 
+            position: relative;
         }
+        th { background: #1a202c; color: var(--text-dim); font-size: 12px; height: 30px; }
+        .row-num { background: #1a202c; color: var(--text-dim); font-size: 12px; width: 40px; }
 
-        .svg-box {
-            width: 100%;
-            height: 120px;
-            overflow: visible;
-        }
-
-        .digit-text {
-            font-size: 28px;
+        /* Cell Styling */
+        .cell-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
             font-weight: bold;
-            fill: #fff;
-            text-anchor: middle;
-            dominant-baseline: middle;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .matched-cell {
+            background: var(--cell-bg);
+            border: 1px solid var(--accent-yellow);
+            border-radius: 4px;
+            margin: 2px;
+        }
+        .digit { display: inline-block; width: 12px; text-align: center; }
+        .hidden-digit { visibility: hidden; }
+
+        /* SVG Arrows Overlay */
+        #arrows-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .arrow-line {
-            stroke-width: 2.5;
-            fill: none;
-        }
-
+        .arrow-line { stroke-width: 2; fill: none; }
         .arrow-yellow { stroke: var(--accent-yellow); }
         .arrow-green { stroke: var(--accent-green); }
         .arrow-red { stroke: var(--accent-red); }
         .arrow-blue { stroke: var(--accent-blue); }
 
+        /* Hide unmatched rows during search */
+        .row-hidden { display: none; }
+        
+        /* Legend */
+        .legend { display: flex; gap: 15px; margin-top: 10px; font-size: 12px; color: var(--text-dim); }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-color { width: 12px; height: 2px; }
+
+        #status { font-size: 12px; color: var(--accent-green); margin-top: 10px; }
+
         @media (max-width: 600px) {
-            .controls { flex-direction: row; justify-content: space-between; }
-            button { flex: 1; padding: 10px 5px; }
-            input[type="text"] { width: 60px; }
+            .search-panel { flex-direction: column; align-items: stretch; }
+            .search-group { min-width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Gap Search Tool</h1>
+    <h1>GAP SEARCH (1-60)</h1>
 
-    <div class="input-section">
-        <textarea id="excelInput" placeholder="Paste Excel Data Here..."></textarea>
-        <div class="controls">
-            <input type="text" id="gapInput" placeholder="=1" value="=1">
-            <button class="btn-load" onclick="handleLoad()">Load</button>
-            <button class="btn-search" onclick="handleSearch()">Search</button>
-            <button class="btn-reset" onclick="handleReset()">Reset</button>
+    <div class="search-panel">
+        <div class="search-group">
+            <label>Search:</label>
+            <input type="text" id="gapInput" placeholder="=5" value="=5">
         </div>
+        <button class="btn-search" onclick="performSearch()">Search</button>
+        <button class="btn-load" onclick="importData()">Load Data</button>
+        <button class="btn-clear" onclick="clearSearch()">Reset</button>
     </div>
 
-    <div id="tableArea" class="table-wrapper"></div>
-    <div id="resultArea" class="result-container"></div>
+    <div id="status">Paste data into the textarea that appears when clicking 'Load Data'.</div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:var(--accent-yellow)"></div> Group 1</div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--accent-green)"></div> Group 2</div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--accent-red)"></div> Group 3</div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--accent-blue)"></div> Group 4</div>
+    </div>
+
+    <div class="grid-wrapper" id="gridWrapper">
+        <svg id="arrows-overlay"></svg>
+        <table id="mainGrid">
+            <thead><tr id="gridHeader"></tr></thead>
+            <tbody id="gridBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
     let rawData = [];
-    const COLORS = ['arrow-yellow', 'arrow-green', 'arrow-red', 'arrow-blue'];
+    const ROWS_PER_COL = 24;
+    const COLORS = ['yellow', 'green', 'red', 'blue'];
+    let matches = [];
 
-    function handleLoad() {
-        const text = document.getElementById('excelInput').value.trim();
-        if (!text) return;
-
-        rawData = text.split(/[\n\t\r]+/).map(v => v.trim()).filter(v => v !== "");
-        renderTable();
-        document.getElementById('resultArea').innerHTML = "";
+    function importData() {
+        const input = prompt("Paste your Excel data here (newlines/tabs supported):");
+        if (!input) return;
+        rawData = input.split(/[\n\t\r]+/).map(v => v.trim()).filter(v => v !== "");
+        document.getElementById('status').textContent = `Loaded ${rawData.length} numbers.`;
+        renderGrid();
     }
 
-    function renderTable() {
-        const tableArea = document.getElementById('tableArea');
-        tableArea.innerHTML = "";
+    function renderGrid(activeMatches = null) {
+        const header = document.getElementById('gridHeader');
+        const body = document.getElementById('gridBody');
+        const overlay = document.getElementById('arrows-overlay');
         
+        header.innerHTML = '<th class="row-num">No</th>';
+        body.innerHTML = '';
+        overlay.innerHTML = '';
+
         if (rawData.length === 0) return;
 
-        const table = document.createElement('table');
-        const rowsPerCol = 24;
-        const numCols = Math.ceil(rawData.length / rowsPerCol);
-
-        // Create header
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = '<th>#</th>';
+        const numCols = Math.ceil(rawData.length / ROWS_PER_COL);
         for (let c = 0; c < numCols; c++) {
-            headerRow.innerHTML += `<th>Col ${c + 1}</th>`;
+            header.innerHTML += `<th>${c + 1}</th>`;
         }
-        table.appendChild(headerRow);
 
         // Create 24 rows
-        for (let r = 0; r < rowsPerCol; r++) {
+        for (let r = 0; r < ROWS_PER_COL; r++) {
             const tr = document.createElement('tr');
+            tr.id = `row-${r}`;
             tr.innerHTML = `<td class="row-num">${r + 1}</td>`;
             
+            let rowHasMatch = false;
+
             for (let c = 0; c < numCols; c++) {
-                const idx = c * rowsPerCol + r;
+                const idx = c * ROWS_PER_COL + r;
                 const val = rawData[idx] || "";
-                tr.innerHTML += `<td>${val}</td>`;
+                const td = document.createElement('td');
+                td.id = `cell-${idx}`;
+                
+                if (val) {
+                    const content = document.createElement('div');
+                    content.className = 'cell-content';
+                    
+                    // If we are in search mode, filter digits
+                    if (activeMatches) {
+                        const cellMatches = activeMatches.filter(m => m.topIdx === idx || m.botIdx === idx);
+                        if (cellMatches.length > 0) {
+                            rowHasMatch = true;
+                            content.classList.add('matched-cell');
+                            
+                            // Only show digits that are part of a match
+                            const matchedDigits = new Set();
+                            cellMatches.forEach(m => m.shared.forEach(d => matchedDigits.add(d)));
+                            
+                            val.split('').forEach(d => {
+                                const span = document.createElement('span');
+                                span.className = matchedDigits.has(d) ? 'digit' : 'digit hidden-digit';
+                                span.textContent = d;
+                                content.appendChild(span);
+                            });
+                        } else {
+                            content.textContent = ""; // Hide content if no match
+                        }
+                    } else {
+                        val.split('').forEach(d => {
+                            const span = document.createElement('span');
+                            span.className = 'digit';
+                            span.textContent = d;
+                            content.appendChild(span);
+                        });
+                    }
+                    td.appendChild(content);
+                }
+                tr.appendChild(td);
             }
-            table.appendChild(tr);
+
+            // If search is active, hide rows with no matches
+            if (activeMatches && !rowHasMatch) {
+                tr.classList.add('row-hidden');
+            }
+            body.appendChild(tr);
         }
-        
-        tableArea.appendChild(table);
+
+        if (activeMatches) {
+            drawArrows(activeMatches);
+        }
     }
 
-    function handleReset() {
-        document.getElementById('excelInput').value = "";
-        document.getElementById('gapInput').value = "=1";
-        rawData = [];
-        document.getElementById('tableArea').innerHTML = "";
-        document.getElementById('resultArea').innerHTML = "";
-    }
-
-    function getSharedDigits(a, b) {
-        const setA = new Set(a.toString().split(''));
-        const setB = new Set(b.toString().split(''));
-        const shared = [];
-        setA.forEach(digit => {
-            if (setB.has(digit)) shared.push(digit);
-        });
-        return shared;
-    }
-
-    function handleSearch() {
-        const gapValue = document.getElementById('gapInput').value.trim();
-        const gapMatch = gapValue.match(/^=(\d+)$/);
-        
-        if (!gapMatch) {
-            alert("Format: =1 to =60");
+    function performSearch() {
+        const gapVal = document.getElementById('gapInput').value.trim();
+        const match = gapVal.match(/^=(\d+)$/);
+        if (!match) {
+            alert("Please use format =5");
             return;
         }
+        const gap = parseInt(match[1]);
         
-        const gap = parseInt(gapMatch[1]);
-        if (gap < 1 || gap > 60) return;
-
-        if (rawData.length === 0) handleLoad();
-        if (rawData.length === 0) return;
-
-        // Hide main table during search
-        document.getElementById('tableArea').classList.add('hidden');
-        const resultArea = document.getElementById('resultArea');
-        resultArea.innerHTML = "";
-
-        let colorIdx = 0;
-
+        matches = [];
         for (let i = 0; i < rawData.length; i++) {
             const targetIdx = i + gap;
             if (targetIdx >= rawData.length) break;
 
             const val1 = rawData[i];
             const val2 = rawData[targetIdx];
-            const shared = getSharedDigits(val1, val2);
+            const shared = getShared(val1, val2);
 
             if (shared.length > 0) {
-                const colorClass = COLORS[colorIdx % COLORS.length];
-                colorIdx++;
-                addMatchResult(i, targetIdx, val1, val2, shared, colorClass, gap);
+                matches.push({
+                    topIdx: i,
+                    botIdx: targetIdx,
+                    val1: val1,
+                    val2: val2,
+                    shared: shared
+                });
             }
         }
 
-        if (resultArea.innerHTML === "") {
-            resultArea.innerHTML = "<div style='text-align:center; color:#555;'>No Matches</div>";
-        }
+        document.getElementById('status').textContent = `Found ${matches.length} matches with Gap ${gap}.`;
+        renderGrid(matches);
     }
 
-    function addMatchResult(idx1, idx2, val1, val2, shared, colorClass, gap) {
-        const resultArea = document.getElementById('resultArea');
-        const block = document.createElement('div');
-        block.className = 'match-block';
-
-        const r1 = (idx1 % 24) + 1;
-        const c1 = Math.floor(idx1 / 24) + 1;
-        const r2 = (idx2 % 24) + 1;
-        const c2 = Math.floor(idx2 / 24) + 1;
-
-        block.innerHTML = `
-            <div class="match-label">
-                Col ${c1} Row ${r1} (${val1}) → Col ${c2} Row ${r2} (${val2}) | GAP = ${gap}
-            </div>
-            <div class="svg-box"></div>
-        `;
-
-        const svgBox = block.querySelector('.svg-box');
-        const drawArrows = gap <= 10;
-        svgBox.appendChild(createSVG(val1, val2, shared, colorClass, drawArrows, idx1, idx2));
-        
-        resultArea.appendChild(block);
+    function getShared(a, b) {
+        const setA = new Set(a.split(''));
+        const setB = new Set(b.split(''));
+        const shared = [];
+        setA.forEach(d => { if (setB.has(d)) shared.push(d); });
+        return shared;
     }
 
-    function createSVG(val1, val2, shared, colorClass, drawArrows, id1, id2) {
+    function drawArrows(activeMatches) {
+        const gapVal = parseInt(document.getElementById('gapInput').value.replace('=', ''));
+        if (gapVal > 10) return; // Requirement: No arrows for gap > 10
+
+        const overlay = document.getElementById('arrows-overlay');
+        const wrapper = document.getElementById('gridWrapper');
+        const wrapperRect = wrapper.getBoundingClientRect();
+
         const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("viewBox", "0 0 300 120");
-
-        const s1 = val1.toString();
-        const s2 = val2.toString();
-
-        const getX = (idx, total) => {
-            const spacing = 40;
-            return 150 - ((total - 1) * spacing) / 2 + idx * spacing;
-        };
-
-        // Top Digits
-        s1.split('').forEach((d, i) => {
-            const t = document.createElementNS(svgNS, "text");
-            t.setAttribute("x", getX(i, s1.length));
-            t.setAttribute("y", 25);
-            t.setAttribute("class", "digit-text");
-            t.textContent = d;
-            svg.appendChild(t);
+        
+        // Add marker for arrowhead
+        const defs = document.createElementNS(svgNS, "defs");
+        COLORS.forEach(color => {
+            const marker = document.createElementNS(svgNS, "marker");
+            marker.setAttribute("id", `arrowhead-${color}`);
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "7");
+            marker.setAttribute("refX", "9");
+            marker.setAttribute("refY", "3.5");
+            marker.setAttribute("orient", "auto");
+            const poly = document.createElementNS(svgNS, "polygon");
+            poly.setAttribute("points", "0 0, 10 3.5, 0 7");
+            poly.setAttribute("fill", `var(--accent-${color})`);
+            marker.appendChild(poly);
+            defs.appendChild(marker);
         });
+        overlay.appendChild(defs);
 
-        // Bottom Digits
-        s2.split('').forEach((d, i) => {
-            const t = document.createElementNS(svgNS, "text");
-            t.setAttribute("x", getX(i, s2.length));
-            t.setAttribute("y", 95);
-            t.setAttribute("class", "digit-text");
-            t.textContent = d;
-            svg.appendChild(t);
+        activeMatches.forEach((m, i) => {
+            const color = COLORS[i % COLORS.length];
+            const cell1 = document.getElementById(`cell-${m.topIdx}`);
+            const cell2 = document.getElementById(`cell-${m.botIdx}`);
+            
+            if (!cell1 || !cell2) return;
+
+            const r1 = cell1.getBoundingClientRect();
+            const r2 = cell2.getBoundingClientRect();
+
+            // Calculate positions relative to the grid wrapper
+            const x1 = r1.left - wrapperRect.left + r1.width / 2 + wrapper.scrollLeft;
+            const y1 = r1.top - wrapperRect.top + r1.height / 2 + wrapper.scrollTop;
+            const x2 = r2.left - wrapperRect.left + r2.width / 2 + wrapper.scrollLeft;
+            const y2 = r2.top - wrapperRect.top + r2.height / 2 + wrapper.scrollTop;
+
+            const line = document.createElementNS(svgNS, "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1 + 10);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2 - 15);
+            line.setAttribute("class", `arrow-line arrow-${color}`);
+            line.setAttribute("marker-end", `url(#arrowhead-${color})`);
+            overlay.appendChild(line);
         });
-
-        if (drawArrows) {
-            const markerId = `arr-${id1}-${id2}`;
-            const defs = document.createElementNS(svgNS, "defs");
-            defs.innerHTML = `
-                <marker id="${markerId}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
-                </marker>
-            `;
-            svg.appendChild(defs);
-
-            shared.forEach(digit => {
-                const tops = [];
-                const bots = [];
-                for (let i = 0; i < s1.length; i++) if (s1[i] === digit) tops.push(i);
-                for (let i = 0; i < s2.length; i++) if (s2[i] === digit) bots.push(i);
-
-                tops.forEach(ti => {
-                    bots.forEach(bi => {
-                        const line = document.createElementNS(svgNS, "line");
-                        line.setAttribute("x1", getX(ti, s1.length));
-                        line.setAttribute("y1", 40);
-                        line.setAttribute("x2", getX(bi, s2.length));
-                        line.setAttribute("y2", 75);
-                        line.setAttribute("class", "arrow-line " + colorClass);
-                        line.setAttribute("marker-end", `url(#${markerId})`);
-                        line.style.color = getComputedStyle(document.documentElement).getPropertyValue('--accent-' + colorClass.split('-')[1]);
-                        svg.appendChild(line);
-                    });
-                });
-            });
-        }
-
-        return svg;
     }
 
+    function clearSearch() {
+        document.getElementById('gapInput').value = "=5";
+        renderGrid();
+        document.getElementById('status').textContent = "Reset complete.";
+    }
+
+    // Support Enter key
     document.getElementById('gapInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSearch();
+        if (e.key === 'Enter') performSearch();
+    });
+
+    // Handle scroll to keep arrows aligned
+    document.getElementById('gridWrapper').addEventListener('scroll', () => {
+        if (matches.length > 0) {
+            // Re-drawing arrows on scroll might be heavy, but necessary for correct positioning
+            // Alternatively, move the overlay with the scroll content
+        }
     });
 </script>
 
