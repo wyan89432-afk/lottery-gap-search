@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  
+<head>
+  
+    <meta charset="UTF-8">
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Advanced Gap Search Tool</title>
+
+    <style>
+      
+        :root {
+          
+            --bg-color: #0b0e14;
+          
+            --panel-bg: #151921;
+          
+            --border-color: #2d343f;
+          
+            --text-main: #ffffff;
+          
+            --text-dim: #94a3b8;
+          
+            --accent-yellow: #fbbf24;
+          
+            --accent-green: #22c55e;
+          
+            --accent-red: #ef4444;
+          
+            --accent-blue: #3b82f6;
+          
+            --cell-bg: #1e293b;
+          
+        }
+      
+
+      
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+      
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 10px; overflow-x: hidden; }
+      
+
+      
+        .container { max-width: 1200px; margin: 0 auto; }
+      
+        h1 { font-size: 1.2rem; margin-bottom: 15px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+      
+
+      
+        .search-panel {
+          
+            background: var(--panel-bg);
+          
+            padding: 15px;
+          
+            border-radius: 8px;
+          
+            border: 1px solid var(--border-color);
+          
+            margin-bottom: 20px;
+          
+            display: flex;
+          
+            flex-wrap: wrap;
+          
+            gap: 10px;
+          
+            align-items: center;
+          
+        }
+      
+
+      
+        .search-group { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+      
+        label { font-size: 14px; color: var(--text-dim); }
+      
+        input[type="text"] {
+          
+            background: #000;
+          
+            border: 1px solid var(--border-color);
+          
+            color: #fff;
+          
+            padding: 8px 12px;
+          
+            border-radius: 4px;
+          
+            width: 100%;
+          
+            outline: none;
+          
+        }
+      
+
+      
+        button {
+          
+            padding: 8px 16px;
+          
+            border-radius: 4px;
+          
+            border: none;
+          
+            cursor: pointer;
+          
+            font-weight: 600;
+          
+            font-size: 13px;
+          
+            transition: all 0.2s;
+          
+        }
+      
+        .btn-search { background: var(--accent-blue); color: white; }
+      
+        .btn-clear { background: var(--accent-red); color: white; }
+      
+        .btn-load { background: var(--accent-green); color: white; }
+      
+
+      
+        .grid-wrapper {
+          
+            position: relative;
+          
+            background: var(--panel-bg);
+          
+            border: 1px solid var(--border-color);
+          
+            border-radius: 8px;
+          
+            padding: 10px;
+          
+            overflow-x: auto;
+          
+            min-height: 600px;
+          
+        }
+      
+
+      
+        table { border-collapse: collapse; position: relative; z-index: 1; width: 100%; table-layout: fixed; }
+      
+        th, td { 
+          
+            border: 1px solid var(--border-color); 
+          
+            width: 80px; 
+          
+            height: 40px; 
+          
+            text-align: center; 
+          
+            position: relative;
+          
+        }
+      
+        th { background: #1a202c; color: var(--text-dim); font-size: 12px; height: 30px; }
+      
+        .row-num { background: #1a202c; color: var(--text-dim); font-size: 12px; width: 40px; }
+      
+
+      
+        .cell-content {
+          
+            display: flex;
+          
+            justify-content: center;
+          
+            align-items: center;
+          
+            height: 100%;
+          
+            font-weight: bold;
+          
+            font-size: 16px;
+          
+            transition: all 0.3s;
+          
+        }
+      
+        .matched-cell {
+          
+            background: var(--cell-bg);
+          
+            border: 1px solid var(--accent-yellow);
+          
+            border-radius: 4px;
+          
+            margin: 2px;
+          
+        }
+      
+
+      
+        #arrows-overlay {
+          
+            position: absolute;
+          
+            top: 0;
+          
+            left: 0;
+          
+            width: 100%;
+          
+            height: 100%;
+          
+            pointer-events: none;
+          
+            z-index: 2;
+          
+        }
+      
+
+      
+        .arrow-line { stroke-width: 2; fill: none; stroke-linecap: round; }
+      
+        .arrow-yellow { stroke: var(--accent-yellow); }
+      
+        .arrow-green { stroke: var(--accent-green); }
+      
+        .arrow-red { stroke: var(--accent-red); }
+      
+        .arrow-blue { stroke: var(--accent-blue); }
+      
+
+      
+        #status { font-size: 12px; color: var(--accent-green); margin-top: 10px; }
+      
+
+      
+        .legend { display: flex; gap: 15px; margin-top: 10px; font-size: 12px; color: var(--text-dim); }
+      
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+      
+        .legend-color { width: 12px; height: 2px; }
+      
+
+      
+        @media (max-width: 600px) {
+          
+            .search-panel { flex-direction: column; align-items: stretch; }
+          
+            .search-group { min-width: 100%; }
+          
+        }
+      
+    </style>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </style></title>
+
+
+
+</head>
