@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAP SEARCH TOOL (1-60)</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --surface-color: #151921;
+            --border-color: #2d343f;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --accent-yellow: #fbbf24;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --primary-color: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 15px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .input-section {
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: #000;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            resize: vertical;
+            margin-bottom: 15px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .gap-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding-left: 12px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .gap-input-wrapper label {
+            color: var(--text-dim);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: #fff;
+            border: none;
+            outline: none;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-load { background-color: var(--accent-green); color: #000; }
+        .btn-search { background-color: var(--primary-color); color: #fff; }
+        .btn-reset { background-color: var(--accent-red); color: #fff; }
+
+        #displayArea {
+            margin-top: 20px;
+        }
+
+        .data-block {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .block-header {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .match-info {
+            color: var(--accent-yellow);
+            font-weight: bold;
+            background: rgba(251, 191, 36, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .digit-text {
+            font-size: 36px;
+            font-weight: 800;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .arrow-line {
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            opacity: 0.8;
+        }
+
+        .arrow-yellow { stroke: var(--accent-yellow); }
+        .arrow-green { stroke: var(--accent-green); }
+        .arrow-red { stroke: var(--accent-red); }
+        .arrow-blue { stroke: var(--accent-blue); }
+
+        .row-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+        }
+
+        .row-label { color: var(--text-dim); font-size: 12px; }
+
+        .shared-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 0 4px;
+            font-weight: bold;
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 600px) {
+            .controls { flex-direction: column; align-items: stretch; }
+            button { width: 100%; }
+            .gap-input-wrapper { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>LOTTERY PATTERN ANALYZER</h1>
+
+    <div class="input-section">
+        <textarea id="excelInput" placeholder="Paste Excel Data Here (One number per line or tab-separated)..."></textarea>
+        <div class="controls">
+            <div class="gap-input-wrapper">
+                <label>GAP</label>
+                <input type="text" id="gapInput" placeholder="=1" value="=1">
+            </div>
+            <button class="btn-load" onclick="handleLoad()">Load Data</button>
+            <button class="btn-search" onclick="handleSearch()">Search Patterns</button>
+            <button class="btn-reset" onclick="handleReset()">Reset</button>
+        </div>
+    </div>
+
+    <div id="displayArea"></div>
+</div>
+
+<script>
+    let rawData = [];
+    const COLORS = ['arrow-yellow', 'arrow-green', 'arrow-red', 'arrow-blue'];
+
+    function handleLoad() {
+        const text = document.getElementById('excelInput').value.trim();
+        if (!text) {
+            alert("Please paste some data first.");
+            return;
+        }
+
+        // Parse data: handles newlines, tabs, and multiple spaces
+        rawData = text.split(/[\n\t\r]+/).map(v => v.trim()).filter(v => v !== "");
+        renderOriginal();
+    }
+
+    function renderOriginal() {
+        const displayArea = document.getElementById('displayArea');
+        displayArea.innerHTML = "";
+        
+        if (rawData.length === 0) return;
+
+        const container = document.createElement('div');
+        container.className = 'data-block';
+        
+        const header = document.createElement('div');
+        header.className = 'block-header';
+        header.innerHTML = `<span>Loaded Data</span><span>${rawData.length} Rows</span>`;
+        container.appendChild(header);
+
+        // Preview first 50 rows if too many
+        const previewLimit = 50;
+        const displayCount = Math.min(rawData.length, previewLimit);
+        
+        for(let i = 0; i < displayCount; i++) {
+            const row = document.createElement('div');
+            row.className = 'row-item';
+            row.innerHTML = `<span class="row-label">Row ${i + 1}</span><span>${rawData[i]}</span>`;
+            container.appendChild(row);
+        }
+
+        if (rawData.length > previewLimit) {
+            const more = document.createElement('div');
+            more.style.textAlign = 'center';
+            more.style.padding = '10px';
+            more.style.color = 'var(--text-dim)';
+            more.style.fontSize = '12px';
+            more.textContent = `... and ${rawData.length - previewLimit} more rows ...`;
+            container.appendChild(more);
+        }
+        
+        displayArea.appendChild(container);
+    }
+
+    function handleReset() {
+        document.getElementById('excelInput').value = "";
+        document.getElementById('gapInput').value = "=1";
+        rawData = [];
+        document.getElementById('displayArea').innerHTML = "";
+    }
+
+    function getSharedDigits(a, b) {
+        const s1 = a.toString();
+        const s2 = b.toString();
+        const shared = [];
+        const seen = new Set();
+        
+        for(let char of s1) {
+            if(s2.includes(char) && !seen.has(char)) {
+                shared.push(char);
+                seen.add(char);
+            }
+        }
+        return shared;
+    }
+
+    function handleSearch() {
+        const gapValue = document.getElementById('gapInput').value.trim();
+        const gapMatch = gapValue.match(/^=(\d+)$/);
+        
+        if (!gapMatch) {
+            alert("Please enter gap in format =1, =2, etc.");
+            return;
+        }
+        
+        const gap = parseInt(gapMatch[1]);
+        if (gap < 1) {
+            alert("Gap must be 1 or greater.");
+            return;
+        }
+
+        if (rawData.length === 0) {
+            handleLoad();
+        }
+
+        if (rawData.length === 0) return;
+
+        const displayArea = document.getElementById('displayArea');
+        displayArea.innerHTML = "";
+
+        let colorIdx = 0;
+        let matchCount = 0;
+
+        for (let i = 0; i < rawData.length; i++) {
+            const targetIdx = i + gap;
+            if (targetIdx >= rawData.length) break;
+
+            const val1 = rawData[i];
+            const val2 = rawData[targetIdx];
+            const shared = getSharedDigits(val1, val2);
+
+            if (shared.length > 0) {
+                const colorClass = COLORS[colorIdx % COLORS.length];
+                colorIdx++;
+                matchCount++;
+                createMatchBlock(i, targetIdx, val1, val2, shared, colorClass, gap);
+            }
+        }
+
+        if (matchCount === 0) {
+            displayArea.innerHTML = "<div style='text-align:center; color:var(--text-dim); padding:40px;'>No patterns found for Gap =" + gap + "</div>";
+        }
+    }
+
+    function createMatchBlock(idx1, idx2, val1, val2, shared, colorClass, gap) {
+        const displayArea = document.getElementById('displayArea');
+        const block = document.createElement('div');
+        block.className = 'data-block';
+
+        const header = document.createElement('div');
+        header.className = 'block-header';
+        header.innerHTML = `<span>Row ${idx1 + 1} → Row ${idx2 + 1}</span><span class="match-info">GAP = ${gap}</span>`;
+        block.appendChild(header);
+
+        const sharedInfo = document.createElement('div');
+        sharedInfo.style.marginBottom = '15px';
+        sharedInfo.style.textAlign = 'center';
+        sharedInfo.innerHTML = `<span style="color:var(--text-dim); font-size:12px;">Shared Digits:</span> ` + 
+            shared.map(d => `<span class="shared-badge">${d}</span>`).join('');
+        block.appendChild(sharedInfo);
+
+        const svgContainer = document.createElement('div');
+        svgContainer.className = 'svg-container';
+        svgContainer.appendChild(createSVG(val1, val2, shared, colorClass));
+        
+        block.appendChild(svgContainer);
+        displayArea.appendChild(block);
+    }
+
+    function createSVG(val1, val2, shared, colorClass) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("viewBox", "0 0 300 140");
+
+        const s1 = val1.toString();
+        const s2 = val2.toString();
+
+        const getX = (idx, total) => {
+            const spacing = 45;
+            const start = 150 - ((total - 1) * spacing) / 2;
+            return start + idx * spacing;
+        };
+
+        // Arrow Marker
+        const defs = document.createElementNS(svgNS, "defs");
+        const marker = document.createElementNS(svgNS, "marker");
+        const markerId = "arrowhead-" + Math.random().toString(36).substr(2, 9);
+        marker.setAttribute("id", markerId);
+        marker.setAttribute("markerWidth", "8");
+        marker.setAttribute("markerHeight", "6");
+        marker.setAttribute("refX", "7");
+        marker.setAttribute("refY", "3");
+        marker.setAttribute("orient", "auto");
+        
+        const polygon = document.createElementNS(svgNS, "polygon");
+        polygon.setAttribute("points", "0 0, 8 3, 0 6");
+        polygon.setAttribute("fill", "currentColor");
+        
+        marker.appendChild(polygon);
+        defs.appendChild(marker);
+        svg.appendChild(defs);
+
+        // Draw Top Digits
+        for (let i = 0; i < s1.length; i++) {
+            const text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", getX(i, s1.length));
+            text.setAttribute("y", 35);
+            text.setAttribute("class", "digit-text");
+            text.textContent = s1[i];
+            svg.appendChild(text);
+        }
+
+        // Draw Bottom Digits
+        for (let i = 0; i < s2.length; i++) {
+            const text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", getX(i, s2.length));
+            text.setAttribute("y", 115);
+            text.setAttribute("class", "digit-text");
+            text.textContent = s2[i];
+            svg.appendChild(text);
+        }
+
+        // Draw Arrows
+        shared.forEach(digit => {
+            const topIndices = [];
+            const bottomIndices = [];
+
+            for (let i = 0; i < s1.length; i++) if (s1[i] === digit) topIndices.push(i);
+            for (let i = 0; i < s2.length; i++) if (s2[i] === digit) bottomIndices.push(i);
+
+            topIndices.forEach(ti => {
+                bottomIndices.forEach(bi => {
+                    const path = document.createElementNS(svgNS, "path");
+                    const x1 = getX(ti, s1.length);
+                    const y1 = 50;
+                    const x2 = getX(bi, s2.length);
+                    const y2 = 95;
+                    
+                    // Simple straight line
+                    path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+                    path.setAttribute("class", "arrow-line " + colorClass);
+                    path.setAttribute("marker-end", `url(#${markerId})`);
+                    
+                    // Get color from CSS variable
+                    const colorVar = '--accent-' + colorClass.split('-')[1];
+                    path.style.color = getComputedStyle(document.documentElement).getPropertyValue(colorVar);
+                    svg.appendChild(path);
+                });
+            });
+        });
+
+        return svg;
+    }
+
+    // Support Enter key
+    document.getElementById('gapInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') handleSearch();
+    });
+</script>
+
+</body>
+</html>
